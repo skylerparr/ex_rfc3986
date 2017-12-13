@@ -26,7 +26,7 @@ defmodule RFC3986.Result do
     host: nil,
     port: nil,
     query: nil,
-    query_string: %{},
+    query_string: [],
     fragment: nil,
     segments: []
 

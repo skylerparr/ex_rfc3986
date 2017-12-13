@@ -63,7 +63,7 @@ defmodule RFC3986.Normalize do
     end
   end
 
-  defp query_string(state = %{query: nil}) do
+  defp query_string(state = [query: nil]) do
     state
   end
 
@@ -75,20 +75,24 @@ defmodule RFC3986.Normalize do
     state
   end
 
-  defp query_string(state = %{query_string: map}, [], acc) do
-    k = Enum.reverse acc
-    %{state | query_string: Map.put(map, k, nil)}
+  defp query_string(state, nil, _acc) do
+    state
   end
 
-  defp query_string(state = %{query_string: map}, [?&|rest], acc) do
-    k = Enum.reverse acc
-    query_string %{state | query_string: Map.put(map, k, nil)}, rest, []
+  defp query_string(state = %{query_string: list}, [], acc) do
+    k = Enum.reverse(acc)
+    %{state | query_string: list ++ [{k, nil}]}
   end
 
-  defp query_string(state = %{query_string: map}, [?=|rest], acc) do
-    k = Enum.reverse acc
+  defp query_string(state = %{query_string: list}, [?&|rest], acc) do
+    k = Enum.reverse(acc)
+    query_string %{state | query_string: list ++ [{k, nil}]}, rest, []
+  end
+
+  defp query_string(state = %{query_string: list}, [?=|rest], acc) do
+    k = Enum.reverse(acc)
     {v, rest} = query_string_value rest
-    query_string %{state | query_string: Map.put(map, k, v)}, rest, []
+    query_string %{state | query_string: list ++ [{k, v}]}, rest, []
   end
 
   defp query_string(state, [char|rest], acc) do
